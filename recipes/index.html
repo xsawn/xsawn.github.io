@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>我的菜谱</title>
+<meta name="description" content="记录做过的菜，按标签筛选，解决今天吃什么。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8D%B3%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap head-row">
+    <div class="brand">
+      <h1>我的菜谱</h1>
+      <p class="sub" id="sub">—</p>
+    </div>
+    <div class="tools">
+      <label class="search">
+        <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="6"/><path d="M13.5 13.5 17 17"/></svg>
+        <input id="search" type="search" placeholder="搜菜名、食材…" autocomplete="off" spellcheck="false">
+      </label>
+      <button id="lucky" class="btn-primary" type="button">今天吃什么</button>
+    </div>
+  </div>
+  <div class="wrap">
+    <div class="tags" id="tags"></div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="grid" id="grid"></div>
+  <div class="empty" id="empty" hidden>
+    <p class="empty-big">没有匹配的菜</p>
+    <p class="empty-small">换个关键词，或清掉几个标签试试。</p>
+    <button class="btn-ghost" id="reset" type="button">清空筛选</button>
+  </div>
+</main>
+
+<div class="modal" id="modal" hidden>
+  <div class="modal-mask" data-close></div>
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="mName">
+    <button class="modal-close" type="button" data-close aria-label="关闭">
+      <svg viewBox="0 0 20 20"><path d="M5 5l10 10M15 5L5 15"/></svg>
+    </button>
+    <h2 id="mName"></h2>
+    <div class="m-tags" id="mTags"></div>
+    <div class="m-body">
+      <section>
+        <h3>食材</h3>
+        <ul class="ing" id="mIng"></ul>
+      </section>
+      <section>
+        <h3>做法</h3>
+        <ol class="steps" id="mSteps"></ol>
+      </section>
+    </div>
+    <p class="m-tip">做的时候点一下可以打勾</p>
+  </div>
+</div>
+
+<div class="lucky" id="luckyBox" hidden>
+  <div class="lucky-mask" data-close></div>
+  <div class="lucky-box">
+    <p class="lucky-label">今天就做</p>
+    <p class="lucky-name" id="luckyName">—</p>
+    <div class="lucky-tags" id="luckyTags"></div>
+    <div class="lucky-actions">
+      <button class="btn-ghost" id="again" type="button">换一道</button>
+      <button class="btn-primary" id="confirm" type="button">看做法</button>
+    </div>
+  </div>
+</div>
+
+<script src="data/recipes.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
