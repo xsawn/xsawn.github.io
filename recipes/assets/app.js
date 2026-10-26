@@ -31,6 +31,20 @@
   var $luckyBox = document.getElementById("luckyBox");
   var luckyPick = null;
 
+  /* ---------- 筛选区折叠（移动端默认收起） ---------- */
+  var $filters = document.getElementById("filters");
+  var $filterToggle = document.getElementById("filterToggle");
+  var $ftCount = document.getElementById("ftCount");
+  function isMobile() { return window.matchMedia("(max-width:640px)").matches; }
+  function setCollapsed(v) {
+    $filters.classList.toggle("collapsed", v);
+    $filterToggle.setAttribute("aria-expanded", String(!v));
+  }
+  setCollapsed(isMobile());
+  $filterToggle.addEventListener("click", function () {
+    setCollapsed(!$filters.classList.contains("collapsed"));
+  });
+
   /* ---------- 筛选 ----------
      同组内 (type/meat/feat) 多选 = 或（满足任一即可）
      组间多选 = 且（同时满足）                                              */
@@ -108,6 +122,7 @@
     var active = state.type.length + state.meat.length + state.feat.length + (state.keyword.trim() ? 1 : 0);
     if (active) parts.push("筛出 " + list.length + " 道");
     $sub.textContent = parts.join(" · ");
+    $ftCount.textContent = active ? " · " + active : "";
 
     $grid.innerHTML = "";
     list.forEach(function (r) {

@@ -69,6 +69,19 @@ h1{margin:0 0 3px;font-size:21px;font-weight:650;letter-spacing:.01em}
 }
 .btn-ghost:hover{background:#f6f3f0;border-color:#cfc9c1}
 
+/* ---------- filter toggle ---------- */
+.filter-toggle{
+  display:inline-flex;align-items:center;gap:6px;
+  height:36px;padding:0 15px;margin:12px 0 2px;border-radius:999px;
+  border:1px solid var(--line-strong);background:var(--card);color:var(--ink2);
+  font-size:13px;font-weight:500;transition:background .16s,border-color .16s,color .16s;
+}
+.filter-toggle:hover{background:#f6f3f0;border-color:#cfc9c1}
+.filter-toggle .ft-count{font-size:11.5px;color:var(--accent);font-weight:600;font-variant-numeric:tabular-nums}
+.filter-toggle .ft-chev{font-size:10px;line-height:1;color:var(--muted);transition:transform .2s}
+.filter-toggle[aria-expanded="false"] .ft-chev{transform:rotate(-90deg)}
+.filters.collapsed{display:none}
+
 /* ---------- tag filter ---------- */
 .tags{display:flex;gap:7px;flex-wrap:wrap;padding-top:14px}
 .chip{
@@ -192,6 +205,8 @@ h1{margin:0 0 3px;font-size:21px;font-weight:650;letter-spacing:.01em}
   .tools{width:100%}
   .search{flex:1}
   .search input{width:100%}
+  .filter-toggle{width:100%;justify-content:space-between;margin:12px 0 0}
+  .filters{margin-top:10px}
   .filter-group{flex-direction:column;gap:0}
   .filter-label{width:auto;padding-top:14px}
   .filter-group .tags{padding-top:8px}

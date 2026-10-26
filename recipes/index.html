@@ -25,7 +25,11 @@
     </div>
   </div>
   <div class="wrap">
-    <div class="filters">
+    <button id="filterToggle" class="filter-toggle" type="button" aria-expanded="true" aria-controls="filters">
+      <span class="ft-label">筛选</span><span class="ft-count" id="ftCount"></span>
+      <span class="ft-chev" aria-hidden="true">▾</span>
+    </button>
+    <div class="filters" id="filters">
       <div class="filter-group">
         <span class="filter-label">类型</span>
         <div class="tags" id="tagType"></div>
