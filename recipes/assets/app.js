@@ -1,19 +1,29 @@
 (function () {
-  var RECIPES = (window.RECIPES || []).map(function (r, i) {
+  var TYPE = ["荤菜", "素菜", "汤", "主食"];
+  var FEATURE = ["快手", "下饭", "清淡", "重口", "宴客"];
+  var MEAT = ["猪肉", "鸡肉", "牛羊肉", "鱼", "海鲜", "蛋", "豆腐", "蔬菜"];
+
+  var RECIPES = (window.RECIPES || []).map(function (r) {
+    var tags = Array.isArray(r.tags) ? r.tags : [];
+    var type = tags.filter(function (t) { return TYPE.indexOf(t) > -1; });
+    var feat = tags.filter(function (t) { return FEATURE.indexOf(t) > -1; });
+    var meat = Array.isArray(r.meat) ? r.meat : [];
     return {
-      id: i,
+      id: r.name,
       name: r.name || "未命名",
-      tags: Array.isArray(r.tags) ? r.tags : [],
+      type: type,
+      meat: meat,
+      feat: feat,
+      allTags: type.concat(meat, feat),
       ingredients: Array.isArray(r.ingredients) ? r.ingredients : [],
       steps: Array.isArray(r.steps) ? r.steps : []
     };
   });
 
-  var state = { keyword: "", tags: [] };
+  var state = { keyword: "", type: [], meat: [], feat: [] };
 
   var $sub = document.getElementById("sub");
   var $grid = document.getElementById("grid");
-  var $tags = document.getElementById("tags");
   var $search = document.getElementById("search");
   var $empty = document.getElementById("empty");
   var $reset = document.getElementById("reset");
@@ -21,51 +31,73 @@
   var $luckyBox = document.getElementById("luckyBox");
   var luckyPick = null;
 
-  /* ---------- 筛选 ---------- */
+  /* ---------- 筛选 ----------
+     同组内 (type/meat/feat) 多选 = 或（满足任一即可）
+     组间多选 = 且（同时满足）                                              */
   function filtered() {
     var kw = state.keyword.trim().toLowerCase();
     return RECIPES.filter(function (r) {
-      var okTags = state.tags.every(function (t) {
-        return r.tags.indexOf(t) > -1;
-      });
-      if (!okTags) return false;
+      var okType = !state.type.length || state.type.some(function (t) { return r.type.indexOf(t) > -1; });
+      var okMeat = !state.meat.length || state.meat.some(function (t) { return r.meat.indexOf(t) > -1; });
+      var okFeat = !state.feat.length || state.feat.some(function (t) { return r.feat.indexOf(t) > -1; });
+      if (!(okType && okMeat && okFeat)) return false;
       if (!kw) return true;
-      var hay = [r.name].concat(r.tags, r.ingredients).join(" ").toLowerCase();
+      var hay = [r.name].concat(r.allTags, r.ingredients).join(" ").toLowerCase();
       return hay.indexOf(kw) > -1;
     });
   }
 
-  function tagCounts() {
-    var map = {};
+  function groupTags() {
+    var typeMap = {}, meatMap = {}, featMap = {};
     RECIPES.forEach(function (r) {
-      r.tags.forEach(function (t) {
-        map[t] = (map[t] || 0) + 1;
-      });
+      r.type.forEach(function (t) { typeMap[t] = (typeMap[t] || 0) + 1; });
+      r.meat.forEach(function (t) { meatMap[t] = (meatMap[t] || 0) + 1; });
+      r.feat.forEach(function (t) { featMap[t] = (featMap[t] || 0) + 1; });
     });
-    return Object.keys(map)
-      .map(function (t) { return { tag: t, n: map[t] }; })
-      .sort(function (a, b) { return b.n - a.n || a.tag.localeCompare(b.tag, "zh"); });
+    function toArr(m) {
+      return Object.keys(m)
+        .map(function (t) { return { tag: t, n: m[t] }; })
+        .sort(function (a, b) { return b.n - a.n || a.tag.localeCompare(b.tag, "zh"); });
+    }
+    return { type: toArr(typeMap), meat: toArr(meatMap), feat: toArr(featMap) };
   }
 
   /* ---------- 渲染 ---------- */
-  function renderTags() {
-    $tags.innerHTML = "";
-    tagCounts().forEach(function (item) {
+  function makeGroup($el, items, bucket) {
+    $el.innerHTML = "";
+    items.forEach(function (item) {
       var b = document.createElement("button");
       b.type = "button";
       b.className = "chip";
-      b.setAttribute("aria-pressed", state.tags.indexOf(item.tag) > -1 ? "true" : "false");
+      b.setAttribute("aria-pressed", state[bucket].indexOf(item.tag) > -1 ? "true" : "false");
       b.innerHTML = '<span></span><span class="n"></span>';
       b.children[0].textContent = item.tag;
       b.children[1].textContent = item.n;
       b.addEventListener("click", function () {
-        var i = state.tags.indexOf(item.tag);
-        if (i > -1) state.tags.splice(i, 1);
-        else state.tags.push(item.tag);
+        var arr = state[bucket];
+        var i = arr.indexOf(item.tag);
+        if (i > -1) arr.splice(i, 1); else arr.push(item.tag);
         renderTags();
         renderGrid();
       });
-      $tags.appendChild(b);
+      $el.appendChild(b);
+    });
+  }
+
+  function renderTags() {
+    var g = groupTags();
+    makeGroup(document.getElementById("tagType"), g.type, "type");
+    makeGroup(document.getElementById("tagMeat"), g.meat, "meat");
+    makeGroup(document.getElementById("tagFeature"), g.feat, "feat");
+  }
+
+  function tagSpans(el, tags) {
+    el.innerHTML = "";
+    tags.forEach(function (t) {
+      var s = document.createElement("span");
+      s.className = "tag";
+      s.textContent = t;
+      el.appendChild(s);
     });
   }
 
@@ -73,9 +105,8 @@
     var list = filtered();
     var total = RECIPES.length;
     var parts = ["共 " + total + " 道菜"];
-    if (state.tags.length || state.keyword.trim()) {
-      parts.push("筛出 " + list.length + " 道");
-    }
+    var active = state.type.length + state.meat.length + state.feat.length + (state.keyword.trim() ? 1 : 0);
+    if (active) parts.push("筛出 " + list.length + " 道");
     $sub.textContent = parts.join(" · ");
 
     $grid.innerHTML = "";
@@ -94,12 +125,7 @@
 
       var tags = document.createElement("div");
       tags.className = "card-tags";
-      r.tags.forEach(function (t) {
-        var s = document.createElement("span");
-        s.className = "tag";
-        s.textContent = t;
-        tags.appendChild(s);
-      });
+      tagSpans(tags, r.allTags);
 
       card.appendChild(name);
       card.appendChild(ing);
@@ -114,15 +140,7 @@
   /* ---------- 详情 ---------- */
   function openRecipe(r) {
     document.getElementById("mName").textContent = r.name;
-
-    var mt = document.getElementById("mTags");
-    mt.innerHTML = "";
-    r.tags.forEach(function (t) {
-      var s = document.createElement("span");
-      s.className = "tag";
-      s.textContent = t;
-      mt.appendChild(s);
-    });
+    tagSpans(document.getElementById("mTags"), r.allTags);
 
     var ing = document.getElementById("mIng");
     ing.innerHTML = "";
@@ -162,14 +180,7 @@
     void nameEl.offsetWidth;
     nameEl.style.animation = "";
 
-    var lt = document.getElementById("luckyTags");
-    lt.innerHTML = "";
-    next.tags.forEach(function (t) {
-      var s = document.createElement("span");
-      s.className = "tag";
-      s.textContent = t;
-      lt.appendChild(s);
-    });
+    tagSpans(document.getElementById("luckyTags"), next.allTags);
   }
 
   /* ---------- 开关 ---------- */
@@ -200,7 +211,7 @@
 
   $reset.addEventListener("click", function () {
     state.keyword = "";
-    state.tags = [];
+    state.type = []; state.meat = []; state.feat = [];
     $search.value = "";
     renderTags();
     renderGrid();
