@@ -22,6 +22,25 @@
 
   var state = { keyword: "", type: [], meat: [], feat: [] };
 
+  /* ---------- 固定搭配 ---------- */
+  var COMBO_TYPE = ["两菜一汤", "三菜一汤"];
+  var COMBO_SCENE = ["快手", "家常", "清淡", "重口", "海鲜", "宴客"];
+  var byName = {};
+  RECIPES.forEach(function (r) { byName[r.name] = r; });
+  var COMBOS = (window.COMBOS || []).map(function (c) {
+    return {
+      name: c.name,
+      type: c.type,
+      scene: c.scene,
+      note: c.note || "",
+      dishes: (c.dishes || []).map(function (n) {
+        return byName[n] || { name: n, type: [], meat: [], feat: [], allTags: [], ingredients: [], steps: [] };
+      })
+    };
+  });
+  var cstate = { type: [], scene: [] };
+  var view = "dishes";
+
   var $sub = document.getElementById("sub");
   var $grid = document.getElementById("grid");
   var $search = document.getElementById("search");
@@ -151,6 +170,134 @@
 
     $empty.hidden = list.length > 0;
   }
+
+  /* ---------- 搭配视图 ---------- */
+  var $comboView = document.getElementById("comboView");
+  var $comboGrid = document.getElementById("comboGrid");
+  var $comboEmpty = document.getElementById("comboEmpty");
+
+  function comboFiltered() {
+    return COMBOS.filter(function (c) {
+      var okType = !cstate.type.length || cstate.type.indexOf(c.type) > -1;
+      var okScene = !cstate.scene.length || cstate.scene.indexOf(c.scene) > -1;
+      return okType && okScene;
+    });
+  }
+
+  function renderComboTags() {
+    var typeCounts = {}, sceneCounts = {};
+    COMBOS.forEach(function (c) { typeCounts[c.type] = (typeCounts[c.type] || 0) + 1; });
+    COMBOS.forEach(function (c) { sceneCounts[c.scene] = (sceneCounts[c.scene] || 0) + 1; });
+    function fill($el, keys, counts, bucket) {
+      $el.innerHTML = "";
+      keys.forEach(function (t) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "chip";
+        b.setAttribute("aria-pressed", cstate[bucket].indexOf(t) > -1 ? "true" : "false");
+        b.innerHTML = '<span></span><span class="n"></span>';
+        b.children[0].textContent = t;
+        b.children[1].textContent = counts[t] || 0;
+        b.addEventListener("click", function () {
+          var arr = cstate[bucket];
+          var i = arr.indexOf(t);
+          if (i > -1) arr.splice(i, 1); else arr.push(t);
+          renderComboTags();
+          renderCombos();
+        });
+        $el.appendChild(b);
+      });
+    }
+    fill(document.getElementById("comboType"), COMBO_TYPE, typeCounts, "type");
+    fill(document.getElementById("comboScene"), COMBO_SCENE, sceneCounts, "scene");
+  }
+
+  function renderCombos() {
+    var list = comboFiltered();
+    $sub.textContent = "共 " + COMBOS.length + " 套搭配" + (list.length < COMBOS.length ? " · 筛出 " + list.length + " 套" : "");
+    $comboGrid.innerHTML = "";
+    list.forEach(function (c) {
+      var card = document.createElement("div");
+      card.className = "combo-card";
+
+      var head = document.createElement("div");
+      head.className = "combo-head";
+      var title = document.createElement("span");
+      title.className = "combo-name";
+      title.textContent = c.name;
+      var badges = document.createElement("span");
+      badges.className = "combo-badges";
+      [c.type, c.scene].forEach(function (t) {
+        var s = document.createElement("span");
+        s.className = "tag";
+        s.textContent = t;
+        badges.appendChild(s);
+      });
+      head.appendChild(title);
+      head.appendChild(badges);
+
+      var listEl = document.createElement("div");
+      listEl.className = "combo-dishes";
+      c.dishes.forEach(function (d, i) {
+        var row = document.createElement("button");
+        row.type = "button";
+        row.className = "combo-dish";
+        var idx = document.createElement("span");
+        idx.className = "combo-idx";
+        idx.textContent = (i + 1);
+        var nm = document.createElement("span");
+        nm.className = "combo-dish-name";
+        nm.textContent = d.name;
+        var tg = document.createElement("span");
+        tg.className = "combo-dish-tags";
+        (d.allTags || []).forEach(function (t) {
+          var s = document.createElement("span");
+          s.className = "tag mini";
+          s.textContent = t;
+          tg.appendChild(s);
+        });
+        row.appendChild(idx);
+        row.appendChild(nm);
+        row.appendChild(tg);
+        if (byName[d.name]) {
+          row.addEventListener("click", function () { openRecipe(byName[d.name]); });
+        } else {
+          row.disabled = true;
+        }
+        listEl.appendChild(row);
+      });
+
+      var note = document.createElement("p");
+      note.className = "combo-note";
+      note.textContent = c.note;
+
+      card.appendChild(head);
+      card.appendChild(listEl);
+      card.appendChild(note);
+      $comboGrid.appendChild(card);
+    });
+    $comboEmpty.hidden = list.length > 0;
+  }
+
+  function setView(v) {
+    view = v;
+    var dishes = v === "dishes";
+    document.getElementById("filters").hidden = !dishes;
+    document.getElementById("filterToggle").hidden = !dishes;
+    document.getElementById("lucky").hidden = !dishes;
+    $grid.hidden = !dishes;
+    $empty.hidden = !dishes;
+    $comboView.hidden = dishes;
+    document.querySelectorAll("#tabs .tab").forEach(function (b) {
+      b.classList.toggle("active", b.getAttribute("data-view") === v);
+    });
+    if (dishes) renderGrid();
+    else { renderComboTags(); renderCombos(); }
+  }
+
+  document.querySelectorAll("#tabs .tab").forEach(function (b) {
+    b.addEventListener("click", function () { setView(b.getAttribute("data-view")); });
+  });
 
   /* ---------- 详情 ---------- */
   function openRecipe(r) {

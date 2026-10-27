@@ -129,6 +129,47 @@ h1{margin:0 0 3px;font-size:21px;font-weight:650;letter-spacing:.01em}
   font-size:11.5px;color:var(--ink2);background:#f5f2ee;
   border-radius:6px;padding:2px 7px;letter-spacing:.01em;white-space:nowrap;
 }
+.tag.mini{font-size:10.5px;padding:1px 6px;background:#f5f2ee}
+
+/* ---------- tabs ---------- */
+.tabs{display:flex;gap:6px;margin-top:14px}
+.tab{
+  border:1px solid var(--line);background:var(--card);
+  border-radius:999px;padding:7px 16px;font-size:13px;color:var(--ink2);
+  transition:all .18s;
+}
+.tab:hover{border-color:var(--line-strong)}
+.tab.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+/* ---------- combo ---------- */
+.combo-view{margin-top:4px}
+.combo-card{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:18px 19px;display:flex;flex-direction:column;gap:13px;
+  transition:box-shadow .2s,transform .2s,border-color .2s;
+}
+.combo-card:hover{box-shadow:var(--shadow);border-color:var(--line-strong)}
+.combo-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.combo-name{font-size:16px;font-weight:600;letter-spacing:.01em}
+.combo-badges{display:flex;gap:5px;flex-wrap:wrap}
+.combo-dishes{display:flex;flex-direction:column;gap:2px;border-top:1px dashed var(--line);padding-top:12px}
+.combo-dish{
+  display:flex;align-items:center;gap:10px;width:100%;
+  background:transparent;border:0;border-radius:9px;padding:7px 8px;text-align:left;
+  transition:background .15s;
+}
+.combo-dish:hover{background:var(--accent-soft)}
+.combo-dish:disabled{opacity:.5;cursor:default}
+.combo-idx{
+  flex:none;width:20px;height:20px;border-radius:50%;background:#f5f2ee;color:var(--ink2);
+  font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums;
+}
+.combo-dish-name{flex:none;font-size:14px;font-weight:500;color:var(--ink)}
+.combo-dish-tags{display:flex;gap:4px;flex-wrap:wrap;margin-left:auto}
+.combo-note{
+  margin:0;font-size:12.5px;color:var(--ink2);line-height:1.55;
+  background:#faf8f5;border-radius:10px;padding:10px 12px;border:1px solid var(--line);
+}
 
 /* ---------- empty ---------- */
 .empty{text-align:center;padding:70px 0 90px}
@@ -217,4 +258,7 @@ h1{margin:0 0 3px;font-size:21px;font-weight:650;letter-spacing:.01em}
   .modal-box{padding:26px 22px 22px;border-radius:16px}
   .modal-box h2{font-size:20px}
   .lucky-name{font-size:25px}
+  .combo-card{padding:15px}
+  .combo-dish-tags{margin-left:8px}
+  .tabs{margin-top:12px}
 }

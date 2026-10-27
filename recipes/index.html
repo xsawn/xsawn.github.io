@@ -43,6 +43,10 @@
         <div class="tags" id="tagFeature"></div>
       </div>
     </div>
+    <div class="tabs" id="tabs">
+      <button class="tab active" data-view="dishes" type="button">全部菜品</button>
+      <button class="tab" data-view="combos" type="button">固定搭配</button>
+    </div>
   </div>
 </header>
 
@@ -52,6 +56,24 @@
     <p class="empty-big">没有匹配的菜</p>
     <p class="empty-small">换个关键词，或清掉几个标签试试。</p>
     <button class="btn-ghost" id="reset" type="button">清空筛选</button>
+  </div>
+
+  <div class="combo-view" id="comboView" hidden>
+    <div class="filters combo-filters" id="comboFilters">
+      <div class="filter-group">
+        <span class="filter-label">套餐</span>
+        <div class="tags" id="comboType"></div>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">场景</span>
+        <div class="tags" id="comboScene"></div>
+      </div>
+    </div>
+    <div class="grid" id="comboGrid"></div>
+    <div class="empty" id="comboEmpty" hidden>
+      <p class="empty-big">没有匹配的搭配</p>
+      <p class="empty-small">换个场景或套餐类型试试。</p>
+    </div>
   </div>
 </main>
 
